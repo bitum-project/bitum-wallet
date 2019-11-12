@@ -1,0 +1,44 @@
+<div class="row">
+	<div class="col-md-9">
+		<h5 class="title-address text-wrap"><fa-icon icon="wallet"></fa-icon> {{ account.address }}</h5>
+		<h6 class="title-address text-wrap"><small><fa-icon icon="key"></fa-icon> {{ account.wallet.publicKey }}</small></h6>
+	  	<div class="amount-balance"><fa-icon icon="balance-scale"></fa-icon> {{ account.amount | cryptoAmount }} {{ bitumConfig.symbol }} <small>(<span *ngIf="account.total >= 10000">+</span>{{ account.total }} {{ '#transactions' }})</small></div>
+	</div>
+	<div class="col-md-3 mt-3 text-center">
+		<input type="type" class="form-control" placeholder="{{ '#Label' | dgTranslate }}" [(ngModel)]="account.wallet.label" />
+		<ngx-qrcode
+		      qrc-element-type="canvas"
+		      [qrc-value]="getQrCodeAddress()"
+		      qrc-class="aclass"
+		      qrc-errorCorrectionLevel="L">
+		</ngx-qrcode>
+		<input type="type" class="form-control mb-3" placeholder="{{ '#Wallet Id' | dgTranslate }}" [(ngModel)]="account.wallet.walletId" />
+	</div>
+</div>
+
+<div *ngIf="account.transactions && account.transactions.length || account.transactionsPool && account.transactionsPool.length">
+	<h3><fa-icon icon="exchange-alt"></fa-icon> {{ '#Last 100 transfers' | dgTranslate }}</h3>
+	<div class="list-group list-group-flush">
+		<div class="list-group-item link-item text-center" *ngFor="let transfer of account.transactionsPool" (click)="openModal('transferDetails', { transfer: transfer, component: 'wallet', size: 'lg'})">
+			<h3 [class.text-danger]="account.address === transfer.from" [class.text-success]="account.address !== transfer.from" >
+				<span *ngIf="account.address === transfer.from">-</span><span *ngIf="account.address !== transfer.from">+</span>{{ transfer.amount | cryptoAmount }} {{ bitumConfig.symbol }}
+			</h3>
+			<p *ngIf="account.address === transfer.from">{{ '#To' | dgTranslate }}: {{ transfer.to | dgTruncate :{limit: 15} }}</p>
+			<p *ngIf="account.address !== transfer.from">{{ '#From' | dgTranslate }}: {{ transfer.from | dgTruncate :{limit: 15} }}</p>
+			<p><fa-icon icon="hourglass-half"></fa-icon></p>
+		</div>
+	</div>
+
+	<div class="list-group list-group-flush">
+		<div class="list-group-item link-item text-center" *ngFor="let transfer of account.transactions" (click)="openModal('transferDetails', { transfer: transfer, component: 'wallet', size: 'lg'})">
+			<h3 [class.text-danger]="account.address === transfer.from" [class.text-success]="account.address !== transfer.from" >
+				<span *ngIf="account.address === transfer.from">-</span><span *ngIf="account.address !== transfer.from">+</span>{{ transfer.amount | cryptoAmount }} {{ bitumConfig.symbol }}
+			</h3>
+			<p *ngIf="account.address === transfer.from">{{ '#To' | dgTranslate }}: {{ transfer.to | dgTruncate :{limit: 15} }}</p>
+			<p *ngIf="account.address !== transfer.from">{{ '#From' | dgTranslate }}: {{ transfer.from | dgTruncate :{limit: 15} }}</p>
+			<p>{{ (transfer.createdAt * 1000) | date:'medium' }}</p>
+		</div>
+	</div>
+</div>
+
+<p class="text-center" *ngIf="!account.transactions || !account.transactions.length">No transaction yet.</p>
